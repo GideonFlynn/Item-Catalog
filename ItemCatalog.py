@@ -25,7 +25,7 @@ UPLOAD_FOLDER = "\static\uploads\images"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 CLIENT_ID = json.loads(
-        open('main/client_secrets.json', 'r')
+        open('client_secrets.json', 'r')
         .read())['web']['client_id']
 APPLICATION_NAME = "is-it-vegan"
 
@@ -1316,10 +1316,10 @@ def fbconnect():
     access_token = request.data
     print("access token received %s " % access_token)
 
-    app_id = json.loads(open('main/fb_client_secrets.json', 'r')
+    app_id = json.loads(open('fb_client_secrets.json', 'r')
                         .read())['web']['app_id']
     app_secret = json.loads(
-            open('main/fb_client_secrets.json', 'r')
+            open('fb_client_secrets.json', 'r')
             .read())['web']['app_secret']
     url = 'https://graph.facebook.com/oauth/' \
           'access_token?grant_type=fb_exchange_token&' \
@@ -1404,7 +1404,7 @@ def gconnect():
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets(
-                'main/client_secrets.json',
+                'client_secrets.json',
                 scope='')
         oauth_flow.redirect_uri = 'postmessage'
         credentials = oauth_flow.step2_exchange(code)
@@ -1518,7 +1518,7 @@ def login(provider):
         try:
             # Upgrade the authorization code into a credentials object
             oauth_flow = flow_from_clientsecrets(
-                    'main/client_secrets.json', scope=''
+                    'client_secrets.json', scope=''
             )
             oauth_flow.redirect_uri = 'postmessage'
             credentials = oauth_flow.step2_exchange(auth_code)
@@ -1622,6 +1622,6 @@ def disconnect():
 # Standard convention. Call if this is run as the main module.
 if __name__ == '__main__':
     app.secret_key = json.loads(
-            open('main/client_secrets.json', 'r')
+            open('client_secrets.json', 'r')
             .read())['web']['client_secret']
     app.run(host='0.0.0.0', port=5050)
