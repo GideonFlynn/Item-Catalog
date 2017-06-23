@@ -107,10 +107,10 @@ def inject_x_rate_headers(response):
 
 
 @rate_limit(limit=30, per=30 * 1)
-@app.route('/token')
+@app.route('/api/v1/token')
 @auth.login_required
 def get_auth_token():
-    # To test the token
+    # To test the token function
     token = g.user.generate_auth_token()
     return jsonify({'token': token.decode('ascii')})
 
@@ -152,34 +152,8 @@ def verify_password(username_or_token, password):
     g.user = user
     return True
 
+
 """User Helper Functions"""
-
-
-@rate_limit(limit=30, per=30 * 1)
-@app.route('/users', methods=['POST'])
-def new_user():
-    # Also an api
-    username = request.json.get('username')
-    password = request.json.get('password')
-    email = request.json.get('email')
-    if username is None or password is None:
-        print "missing arguments"
-        abort(400)
-
-    if sess.query(User).filter_by(username=username).first() is not None:
-        print "existing user"
-        user = sess.query(User).filter_by(username=username).first()
-        return jsonify(
-                {
-                    'message': 'user already exists'
-                }), 200
-
-    user = User(username=username, email=email)
-    user.hash_password(password)
-    sess.add(user)
-    sess.commit()
-    return jsonify(
-            {'username': user.username}), 201
 
 
 def create_user(login_session):
@@ -216,21 +190,44 @@ def get_user_id(email):
 API/JSON routes
 """
 
+"User API"
+
 
 @rate_limit(limit=30, per=30 * 1)
-@app.route('/api/users/<int:id>')
+@app.route('/api/v1/users', methods=['POST'])
+def new_user():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    email = request.json.get('email')
+    if username is None or password is None:
+        print "missing arguments"
+        abort(400)
+
+    if sess.query(User).filter_by(username=username).first() is not None:
+        print "existing user"
+        user = sess.query(User).filter_by(username=username).first()
+        return jsonify(
+                {
+                    'message': 'user already exists'
+                }), 200
+
+    user = User(username=username, email=email)
+    user.hash_password(password)
+    sess.add(user)
+    sess.commit()
+    return jsonify(
+            {'username': user.username}), 201
+
+
+@rate_limit(limit=30, per=30 * 1)
+@app.route('/api/v1/users/<int:id>')
 def get_user(id):
     user = sess.query(User).filter_by(id=id).one()
     if not user:
         abort(400)
     return jsonify({'username': user.username})
 
-
-@rate_limit(limit=30, per=30 * 1)
-@app.route('/api/resource')
-@auth.login_required
-def get_resource():
-    return jsonify({'data': 'Hello, %s!' % g.user.username})
+"Catalog API"
 
 
 @rate_limit(limit=30, per=30 * 1)
@@ -238,7 +235,8 @@ def get_resource():
 def index_json():
     category = sess.query(Category).all()
     return jsonify(
-            category=[c.serialize for c in category])
+            A_title="Listing all categories:",
+            categories=[c.serialize for c in category])
 
 
 @rate_limit(limit=30, per=30 * 1)
@@ -251,6 +249,7 @@ def category_json(category_id):
         .filter_by(category=category_id) \
         .all()
     return jsonify(
+            A_title="Here is your requested category and it's items:",
             category=[category.serialize],
             item=[i.serialize for i in item])
 
@@ -266,7 +265,8 @@ def u_item_json(category_id, item_id):
                    id=item_id) \
         .one()
     return jsonify(
-            item=[item.serialize])
+            A_title="Here is your requested item:",
+            items=[item.serialize])
 
 
 @rate_limit(limit=30, per=30 * 1)
@@ -275,7 +275,8 @@ def all_shops_json():
     shops = sess.query(Shop) \
         .all()
     return jsonify(
-            shop=[s.serialize for s in shops])
+            A_title="Listing all shops:",
+            shops=[s.serialize for s in shops])
 
 
 @rate_limit(limit=30, per=30 * 1)
@@ -285,6 +286,7 @@ def u_shop_json(shop_id):
         .filter_by(id=shop_id) \
         .one()
     return jsonify(
+            A_title="Here is your requested shop:",
             shop=[u_shop.serialize])
 
 
@@ -294,7 +296,8 @@ def all_manufacturers_json():
     manufacturers = sess.query(Manufacturer) \
         .all()
     return jsonify(
-            manufacturer=[
+            A_title="Listing all manufacturers:",
+            manufacturers=[
                 m.serialize for m in manufacturers])
 
 
@@ -305,10 +308,14 @@ def u_manufacturer_json(manufacturer_id):
         .filter_by(id=manufacturer_id) \
         .one()
     return jsonify(
+            A_title="Here is your requested manufacturer:",
             manufacturer=[manufacturer.serialize])
 
 
-"""End of API routes"""
+"""
+End of API routes
+"""
+
 
 """
 Index/category routes
