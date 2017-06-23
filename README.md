@@ -7,8 +7,8 @@ The app has CRUD operations for:
 - Shops
 - Manufacturers
 - Items
-  - To add a new category/shop/manufacturer go to 'http://localhost:5050/<tablename>/new'
-    - For items, instead go to 'http://localhost:5050/<category id>/item/new'
+  - To add a new category/shop/manufacturer go to 'http://localhost:5050/tablename/new'
+    - For items, instead go to 'http://localhost:5050/category-id/item/new'
   - To edit an entry - provided you are the creator - go to the entry and press the edit button
   - To delete an entry - provided you are the creator - go to the entry and press the delete button
 
