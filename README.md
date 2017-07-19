@@ -28,7 +28,7 @@ This code runs in a Vagrant environment:
 - Run `vagrant init`
   ###### This might take a while, go grab some water or do some exercises
   ###### Congratulations! You are now able to access the vagrant folder inside your 'box'
-  ##Running
+  ## Running
   - `vagrant up`
   - `vagrant ssh`
     - `cd /vagrant`
