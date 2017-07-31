@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://atlas.hashicorp.com/search.
   # config.vm.box = "base"
-  config.vm.box = "bento/ubuntu-16.04-i386"
+  config.vm.box = "ubuntu/trusty64"
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -25,10 +25,7 @@ Vagrant.configure("2") do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # NOTE: This will enable public access to the opened port
   # config.vm.network "forwarded_port", guest: 80, host: 8080
-  config.vm.network "forwarded_port", guest: 8000, host: 8000, host_ip: "127.0.0.1"
-  config.vm.network "forwarded_port", guest: 8080, host: 8080, host_ip: "127.0.0.1"
-  config.vm.network "forwarded_port", guest: 5000, host: 5000, host_ip: "127.0.0.1"
-  config.vm.network "forwarded_port", guest: 5050, host: 5050, host_ip: "127.0.0.1"
+  config.vm.network "forwarded_port", guest: 80, host: 8080
 
 
   # Create a forwarded port mapping which allows access to a specific port
@@ -82,25 +79,28 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  #   apt-get install -y apache2
    config.vm.provision "shell", inline: <<-SHELL
      apt-get -qqy update
-     apt-get -qqy install make zip unzip postgresql
-     apt-get -qqy install python python-pip
+     apt-get -qqy install postgresql postgresql-contrib
+     apt-get -qqy install python2.7 python-pip
+     apt-get -qqy install python-dev
+     apt-get -qqy install finger
      pip2 install --upgrade pip
-     pip2 install flask packaging requests oauth2client redis passlib flask-httpauth
-     pip2 install sqlalchemy flask-sqlalchemy psycopg2 bleach
-     # Work around https://github.com/chef/bento/issues/661
-     # apt-get -qqy upgrade
-     DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
-
-     vagrantTip="[35m[1mThe shared directory is located at /vagrant\\nTo access your shared files: cd /vagrant[m"
-     echo -e $vagrantTip > /etc/motd
      wget http://download.redis.io/redis-stable.tar.gz
      tar xvzf redis-stable.tar.gz
      cd redis-stable
      make
      make install
+     apt-get -qqy install apache2
+     apt-get -qqy install libapache2-mod-wsgi
+     apt-get -qqy install git-all
+     apt-get -qqy upgrade
+     apt-get -qqy update
+     apt-get -qqy autoremove
+     DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
+
+     vagrantTip="[35m[1mThe shared directory is located at /vagrant\\nTo access your shared files: cd /vagrant[m"
+     echo -e $vagrantTip > /etc/motd
      echo "Done installing your virtual machine!"
    SHELL
 end
