@@ -406,7 +406,7 @@ def category(category_id):
 @app.route('/categories/new')
 @app.route('/category/new', methods=['GET', 'POST'])
 def new_category():
-    if 'username' not in login_session:
+    if 'username' and 'user_id' not in login_session:
         return redirect('/login')
     """Menu queries"""
     menu_categories = sess.query(Category) \
