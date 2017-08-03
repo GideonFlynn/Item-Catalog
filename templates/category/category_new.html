@@ -3,19 +3,58 @@
 
     <div class="form-section">
         <div class="form-container">
-            <div class="form-block w-form">
-                <h1 class="heading-2"></h1>
-                <form method="post" class="form" action="{{ url_for('new_category') }}" enctype=multipart/form-data>
-                    <label class="field-label" for="Input">Name:</label>
-                    <input autofocus="autofocus" class="input-field w-input" maxlength="256"
-                           name="name" type="text" placeholder=''>
-                    <label class="field-label" for="Input">Description:</label>
-                    <input class="input-field w-input" maxlength="1024"
-                           name="description" type="text" placeholder=''>
+            <form method="post" class="form" action="{{ url_for('edit_category', category_id = category.id) }}"
+                  enctype=multipart/form-data>
+                <h2 class="form-header">{{ category.name }}</h2>
+                <h4 class="field-label required">Felter med * skal udfyldes</h4>
+                <div class="form-row">
+                    <label class="field-label" for="Navn">Navn*:</label><input autofocus="autofocus"
+                                                                               class="text-field w-input"
+                                                                               id="Navn"
+                                                                               maxlength="256"
+                                                                               name="Navn"
+                                                                               type="text"
+                                                                               placeholder=''>
+                </div>
+                <div class="form-row">
+                    <label class="field-label" for="Beskrivelse">Beskrivelse*</label>
+                    <textarea
+                            class="text-field-area w-input" data-name="Beskrivelse" id="Beskrivelse" placeholder=""
+                            maxlength="5000"
+                            name="Beskrivelse">
+                </textarea>
+                </div>
+                <div class="form-row">
+                    <label class="field-label" for="Butik Id">Butik id*</label><input autofocus="autofocus"
+                                                                                      class="text-field w-input"
+                                                                                      id="Butik Id"
+                                                                                      maxlength="256"
+                                                                                      name="Butik Id"
+                                                                                      type="text"
+                                                                                      placeholder=''>
+                </div>
+                <div class="form-row">
+                    <label class="field-label" for="Navn">Producent navn*</label><input autofocus="autofocus"
+                                                                                        class="text-field w-input"
+                                                                                        id="Producent navn"
+                                                                                        maxlength="256"
+                                                                                        name="Producent navn"
+                                                                                        type="text"
+                                                                                        placeholder=''>
+                </div>
+                <div class="form-row">
+                    <label class="field-label" for="Ingredienser">Ingredienser</label>
+                    <textarea
+                            class="text-field-area w-input" data-name="Beskrivelse 2" id="Ingrediense" placeholder=""
+                            maxlength="5000"
+                            name="Ingredienser">
+                </textarea>
+                </div>
+                <div class="form-row">
                     <input type=file name=file>
-                    <input class="submit-button w-button" type='submit' value='Create'>
-                </form>
-            </div>
+                    <input class="submit-btn w-button" type='submit' value='Upload billede'>
+                </div>
+            </form>
         </div>
     </div>
 
