@@ -80,9 +80,6 @@
         </div>
     </div>
 
-    {% block content %}
-    {% endblock %}
-
     {% with messages = get_flashed_messages() %}
         {% if messages %}
 
@@ -97,6 +94,10 @@
             </div>
         {% endif %}
     {% endwith %}
+
+    {% block content %}
+    {% endblock %}
+
 
     {% block body %}
     {% endblock %}
