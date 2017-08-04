@@ -16,8 +16,8 @@
                 <div class="card-actions-container w-clearfix">
                     <a class="card-ingredients w-button"
                        data-ix="show-ingredients">Ingredienser</a>
-                    <a class="card-button category w-button"
-                       href="{{ url_for('edit_item', item_id = item.id) }}">Redigér</a>
+                    <a class="card-button w-button"
+                       href="{{ url_for('edit_item', item_id = item.id, category_id = category.id) }}">Redigér</a>
                     <p class="ingredients-text">{{ item.ingredients }}</p>
                 </div>
             </div>

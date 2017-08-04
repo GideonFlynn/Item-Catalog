@@ -197,7 +197,7 @@ a {
   background-color: #fff;
 }
 .big {
-  height: 380px;
+  height: 400px;
   max-height: 500px;
   width: 60%;
   min-width: 40%;
@@ -806,6 +806,7 @@ a {
   }
   .big {
     width: 80%;
+    height: 320px;
     max-height: 460px;
     min-width: 50%;
     max-width: 100%;
