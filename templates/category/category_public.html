@@ -3,6 +3,8 @@
 
     <main class="card-container">
     <h1 class="front-header">{{ category.name }}</h1>
+    <img class="image" src="../../static/uploads/images/{{ category.up_file }}">
+    <h3 class="front-header">{{ category.description }}</h3>
 
     {% for item in item %}
 
