@@ -86,11 +86,11 @@
     {% with messages = get_flashed_messages() %}
         {% if messages %}
 
-            <div class=flashes>
+            <div class="form">
 
                 {% for message in messages %}
 
-                    <p>{{ message }}</p><br>
+                    <h4>{{ message }}</h4><br>
 
                 {% endfor %}
 
@@ -100,6 +100,8 @@
 
     {% block body %}
     {% endblock %}
+    {% block delete %}
+    {%  endblock %}
 
     <footer class="footer">
         <p class="copyright-text">Copyright © 2017 Mathias Wøbbe</p>
