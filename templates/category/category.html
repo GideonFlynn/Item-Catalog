@@ -1,6 +1,7 @@
 {% extends "main.html" %}
-{% block body %}
-<main class="card-container">
+{% block content %}
+
+    <main class="card-container">
     <h1 class="front-header">{{ category.name }}</h1>
 
     {% for item in item %}
@@ -22,4 +23,5 @@
 
     {% endfor %}
 {% endblock %}
+
 </main>
