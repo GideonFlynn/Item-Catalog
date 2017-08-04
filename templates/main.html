@@ -86,11 +86,11 @@
     {% with messages = get_flashed_messages() %}
         {% if messages %}
 
-            <div class="form">
+            <div class="form-section">
 
                 {% for message in messages %}
 
-                    <h2>{{ message }}</h2><br>
+                    <h2 class="card-title">{{ message }}</h2><br>
 
                 {% endfor %}
 

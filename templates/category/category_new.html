@@ -4,18 +4,18 @@
     <div class="form-section">
         <div class="form-container w-form">
             <form method="post" class="form" action="{{ url_for('new_category') }}"
-                  enctype=multipart/form-data>
-                <h2 class="form-header">{{ category.name }}</h2>
+                      enctype="multipart/form-data">
+                <h2 class="form-header">Lav ny kategori</h2>
                 <h4 class="field-label required">Felter med * skal udfyldes</h4>
                 <div class="form-row">
                     <label class="field-label" for="Input">Navn*</label>
-                    <input autofocus="autofocus"
-                           class="text-field w-input" maxlength="256" name="name" type="text" placeholder=''>
+                    <input autofocus="autofocus" class="text-field w-input" maxlength="256"
+                           name="name" type="text" placeholder=''>
                 </div>
                 <div class="form-row">
                     <label class="field-label" for="Input">Beskrivelse*</label>
                     <input autofocus="autofocus"
-                           class="text-field w-input" maxlength="256" name="description" type="text" placeholder=''>
+                           class="text-field-area w-input" maxlength="256" name="description" type="text" placeholder=''>
                 </div>
 
                 {#
