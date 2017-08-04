@@ -406,7 +406,7 @@ def category(category_id):
 @app.route('/categories/new')
 @app.route('/category/new', methods=['GET', 'POST'])
 def new_category():
-    if 'username' and 'user_id' not in login_session:
+    if 'username' not in login_session:
         return redirect('/login')
     """Menu queries"""
     menu_categories = sess.query(Category) \
@@ -1493,7 +1493,8 @@ def gconnect():
         user_id = create_user(login_session)
     login_session['user_id'] = user_id
 
-    output = ''
+    output = '<section class="form-section">'
+    output += '<div class="form-container">'
     output += '<h1>Welcome, '
     output += login_session['username']
     output += '!</h1>'
@@ -1502,7 +1503,9 @@ def gconnect():
     output += '"style = "width: 300px;' \
               'height: 300px;border-radius: 150px' \
               '-webkit-border-radius: 150px;' \
-              '-moz-border-radius: 150px;"> '
+              '-moz-border-radius: 150px;"> ' \
+              '</section>' \
+              '</div>'
     flash("you are now logged in as %s"
           % login_session['username'])
     print("done!")

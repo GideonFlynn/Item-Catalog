@@ -17,7 +17,7 @@ secret_key = ''.join(random.choice(
 
 
 class User(Base):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
     username = Column(Text, index=True)
@@ -65,7 +65,7 @@ class Category(Base):
     name = Column(Text, nullable=False)
     description = Column(Text, nullable=False)
     up_file = Column(Text)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
 
     @property
@@ -85,7 +85,7 @@ class Manufacturer(Base):
     description = Column(Text, nullable=False)
     up_file = Column(Text)
     id = Column(Integer, index=True, unique=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
 
     @property
@@ -104,7 +104,7 @@ class Shop(Base):
     name = Column(Text, nullable=False, index=True)
     description = Column(Text, nullable=False)
     up_file = Column(Text)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
 
     @property
@@ -129,7 +129,7 @@ class Item(Base):
     m_id = Column(Text, ForeignKey('manufacturer.name'), nullable=False)
     s_id = Column(Integer, ForeignKey('shop.id'), nullable=False)
     # Make relationships so SQLAlchemy knows them.
-    user_id = Column(Integer, ForeignKey('user.id'))
+    user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
     Category_id = relationship(Category)
     Manufacturer_id = relationship(Manufacturer)
