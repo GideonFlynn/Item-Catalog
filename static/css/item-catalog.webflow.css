@@ -146,7 +146,7 @@ a {
   display: flex;
   width: 24%;
   max-height: 100%;
-  min-height: 100%;
+  min-height: 278px;
   max-width: 50%;
   min-width: 10%;
   margin-top: 24px;
@@ -267,7 +267,7 @@ a {
   line-height: 1.5em;
   text-align: left;
 }
-.card-button > .category {
+.category {
   position: relative;
   z-index: 2;
   display: block;
@@ -783,9 +783,6 @@ a {
   }
   .card {
     width: 48%;
-    height: 10%;
-    background-image: -webkit-radial-gradient(circle farthest-corner at 58% 49%, #45b649, #a2e35b 99%);
-    background-image: radial-gradient(circle farthest-corner at 58% 49%, #45b649, #a2e35b 99%);
   }
   .menu-header {
     width: 100%;
@@ -888,7 +885,6 @@ a {
   }
   .card {
     width: 47%;
-    height: 10%;
     min-height: 5%;
   }
   .menu-header {
@@ -947,7 +943,6 @@ a {
   }
   .card {
     width: 100%;
-    height: 10%;
     max-width: 100%;
   }
   .menu-header {
