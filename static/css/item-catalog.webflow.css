@@ -196,6 +196,14 @@ a {
   min-width: 100%;
   background-color: #fff;
 }
+.big {
+  height: 380px;
+  max-height: 500px;
+  width: 60%;
+  min-width: 40%;
+  max-width: 95%;
+
+}
 
 .card-title {
   margin: 24px 16px 0px;
@@ -459,7 +467,6 @@ a {
 }
 
 .page-container {
-  height: 100vh;
   min-height: 900px;
   background-image: -webkit-linear-gradient(270deg, #ebebeb, #ebebeb);
   background-image: linear-gradient(180deg, #ebebeb, #ebebeb);
@@ -796,6 +803,12 @@ a {
     -webkit-flex: 0 0 auto;
     -ms-flex: 0 0 auto;
     flex: 0 0 auto;
+  }
+  .big {
+    width: 80%;
+    max-height: 460px;
+    min-width: 50%;
+    max-width: 100%;
   }
   .card-ingredients {
     display: inline-block;

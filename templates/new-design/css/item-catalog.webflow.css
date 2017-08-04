@@ -190,6 +190,9 @@
   min-width: 100%;
   background-color: #fff;
 }
+.big {
+  height: 380px;
+}
 
 .card-title {
   margin: 24px 16px 0px;
