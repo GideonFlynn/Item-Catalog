@@ -807,8 +807,7 @@ def delete_item(category_id, item_id):
     if request.method == 'POST':
         sess.delete(item_to_delete)
         sess.commit()
-        return redirect(url_for('category',
-                                category_id=category.id,
+        return redirect(url_for('index',
                                 menu_categories=menu_categories,
                                 menu_shops=menu_shops,
                                 menu_manufacturers=menu_manufacturers
@@ -816,7 +815,7 @@ def delete_item(category_id, item_id):
     else:
         return render_template('item/deleteconfirmation_item.html',
                                item=item_to_delete,
-                               category=category,
+                               category_id=category.id,
                                menu_categories=menu_categories,
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
