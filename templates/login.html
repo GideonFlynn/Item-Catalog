@@ -15,7 +15,8 @@
     <script src="//apis.google.com/js/platform.js?onload=start"></script>
     <!-- END PRE-REQUISITES FOR GOOGLE SIGN IN -->
 
-
+    <section class="form-section">
+    <div class="form-container">
     <div id="signInButton">
           <span class="g-signin"
                 data-scope="openid email"
@@ -45,7 +46,7 @@
                             $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
                             setTimeout(function () {
                                 window.location.href = "/";
-                            }, 4000);
+                            }, 2000);
 
                         } else if (authResult['error']) {
                             console.log('There was an error: ' + authResult['error']);
@@ -224,4 +225,6 @@
 
     </fb:login-button>
     <!--END FACEBOOK SIGN IN -->
+    </div>
+    </section>
 {% endblock %}
