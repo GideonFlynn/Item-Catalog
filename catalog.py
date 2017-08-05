@@ -343,7 +343,9 @@ def index():
     category = sess.query(Category) \
         .all()
     user_id = login_session['user_id']
-    creator_id = sess.query(Category.user_id).filter_by(user_id).all()
+    print user_id
+    creator_id = sess.query(Category.user_id).filter_by(user_id=user_id).all()
+    print creator_id
     if user_id != creator_id:
         return render_template('category/category_index_public.html',
                                category=category,
