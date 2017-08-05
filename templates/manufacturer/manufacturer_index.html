@@ -2,7 +2,7 @@
 {% block body %}
 
     <main class="card-container">
-    {% for manufacturer in manufacturers %}
+    {% for manufacturer in manufactureres %}
 
         <div class="card">
                 <a href="{{ url_for('u_manufacturer', manufacturer_id = manufacturer.id) }}">
@@ -12,7 +12,7 @@
                 <div class="card-actions w-clearfix">
                     <div class="card-actions-container w-clearfix">
                         <a class="card-button category w-button"
-                           href="{{ url_for('edit_manufacturer', manufacturer = manufacturer.id) }}">Redigér</a>
+                           href="{{ url_for('edit_manufacturer', manufacturer_id = manufacturer.id) }}">Redigér</a>
                     </div>
                 </div>
             </div>
