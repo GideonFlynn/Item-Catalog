@@ -364,7 +364,7 @@ def category(category_id):
     category = sess.query(Category) \
         .filter_by(id=category_id) \
         .one()
-    if sess.query(literal(True)).filter(category.id.exist()).scalar():
+    if category.count():
         return redirect(url_for('index'))
     else:
         creator = get_user_info(category.user_id)
