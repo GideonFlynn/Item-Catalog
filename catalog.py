@@ -779,7 +779,7 @@ def edit_item(category_id, item_id):
 @app.route('/category/<int:category_id>/items/<int:item_id>/delete',
            methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
-    category = sess.query(Category) \
+    category = sess.query(Category.id) \
         .filter_by(id=category_id) \
         .one()
     item_to_delete = sess.query(Item) \
@@ -798,11 +798,16 @@ def delete_item(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
     if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to delete from this category.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to delete from this category.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect(url_for('index',
+                                 menu_categories=menu_categories,
+                                 menu_shops=menu_shops,
+                                 menu_manufacturers=menu_manufacturers
+                                 )))
 
     if request.method == 'POST':
         sess.delete(item_to_delete)
@@ -815,7 +820,7 @@ def delete_item(category_id, item_id):
     else:
         return render_template('item/deleteconfirmation_item.html',
                                item=item_to_delete,
-                               category_id=category.id,
+                               category_id=category,
                                menu_categories=menu_categories,
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
