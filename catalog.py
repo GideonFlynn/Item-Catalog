@@ -364,42 +364,46 @@ def category(category_id):
     category = sess.query(Category) \
         .filter_by(id=category_id) \
         .one()
-    if category.count():
-        return redirect(url_for('index'))
-    else:
+    if sess.query(Category) \
+        .filter_by(id=category_id) \
+            .count():
+
         creator = get_user_info(category.user_id)
-    items = sess.query(Item) \
-        .filter_by(category=category_id) \
-        .all()
+        items = sess.query(Item) \
+            .filter_by(category=category_id) \
+            .all()
 
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    if creator.id != login_session['user_id']:
-        return render_template('category/category_public.html',
-                               creator=creator,
-                               item=items,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
+        if creator.id != login_session['user_id']:
+            return render_template('category/category_public.html',
+                                   creator=creator,
+                                   item=items,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+        else:
+            return render_template('category/category.html',
+                                   creator=creator,
+                                   item=items,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+
     else:
-        return render_template('category/category.html',
-                               creator=creator,
-                               item=items,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    pass
+            return redirect(url_for('index'))
+pass
 
 
 @auth.login_required
