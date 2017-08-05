@@ -361,12 +361,13 @@ def index():
            methods=['GET'])
 def category(category_id):
     # Show items based on category id
-    category = sess.query(Category) \
-        .filter_by(id=category_id) \
-        .one()
     if sess.query(Category) \
         .filter_by(id=category_id) \
             .count():
+
+        category = sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one()
 
         creator = get_user_info(category.user_id)
         items = sess.query(Item) \
@@ -473,13 +474,13 @@ def new_category():
 def edit_category(category_id):
     if 'username' not in login_session:
         return redirect('/login')
-    edited_category = sess.query(Category.id).filter_by(id=category_id).one()
     if sess.query(Category).filter_by(id=category_id).count():
+        edited_category = sess.query(Category.id).filter_by(id=category_id).one()
         if edited_category.user_id != login_session['user_id']:
             "<script>function myFunction()" \
-                "{alert('You are not authorized to edit this category.');}" \
-                "</script>" \
-                "<body onload='myFunction()''>"
+            "{alert('You are not authorized to edit this category.');}" \
+            "</script>" \
+            "<body onload='myFunction()''>"
             return redirect(url_for('index'))
 
         """Menu queries"""
@@ -594,8 +595,8 @@ Item routes
 @app.route('/category/<int:category_id>/items/<int:item_id>',
            methods=['GET', 'POST'])
 def u_items(category_id, item_id):
-    category = sess.query(Category).filter_by(id=category_id).one()
     if sess.query(Category.id).filter_by(id=category_id).count():
+        category = sess.query(Category).filter_by(id=category_id).one()
         item = sess.query(Item).filter_by(
             category=category_id, id=item_id).one()
     else:
@@ -641,13 +642,13 @@ def u_items(category_id, item_id):
 def new_item(category_id):
     if 'username' and 'user_id' not in login_session:
         return redirect('/login')
-    category = sess.query(Category) \
-        .filter_by(id=category_id) \
-        .one()
     if sess.query(Category) \
         .filter_by(id=category_id) \
             .count():
 
+        category = sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one()
         """Menu queries"""
         menu_categories = sess.query(Category) \
             .order_by(Category.id) \
@@ -732,17 +733,16 @@ def new_item(category_id):
 def edit_item(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
-    category = sess.query(Category).filter_by(id=category_id).one()
     if sess.query(Category.id).filter_by(id=category_id).count():
-        edited_item = sess.query(Item) \
-            .filter_by(id=item_id) \
-            .one()
+        category = sess.query(Category).filter_by(id=category_id).one()
     else:
         return redirect(url_for('index'))
-
     if sess.query(Item) \
             .filter_by(id=item_id) \
             .count():
+        edited_item = sess.query(Item) \
+            .filter_by(id=item_id) \
+            .one()
         if category.user_id != login_session['user_id']:
             return ("<script>function myFunction()"
                     "{alert"
@@ -818,12 +818,12 @@ def edit_item(category_id, item_id):
 def delete_item(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
-    category = sess.query(Category) \
-        .filter_by(id=category_id) \
-        .one()
     if sess.query(Category) \
             .filter_by(id=category_id) \
             .count():
+        category = sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one()
         item_to_delete = sess.query(Item) \
             .filter_by(id=item_id) \
             .one()
@@ -891,8 +891,8 @@ def all_shops():
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/shop/<int:shop_id>/', methods=['GET', 'POST'])
 def u_shop(shop_id):
-    shop = sess.query(Shop).filter_by(id=shop_id).one()
     if sess.query(Shop).filter_by(id=shop_id).count():
+        shop = sess.query(Shop).filter_by(id=shop_id).one()
         """Menu queries"""
         menu_categories = sess.query(Category) \
             .order_by(Category.id) \
@@ -994,12 +994,12 @@ def new_shop():
 def edit_shop(shop_id):
     if 'username' not in login_session:
         return redirect('/login')
-    edited_shop = sess.query(Shop) \
-        .filter_by(id=shop_id) \
-        .one()
     if sess.query(Shop) \
             .filter_by(id=shop_id) \
             .count():
+        edited_shop = sess.query(Shop) \
+            .filter_by(id=shop_id) \
+            .one()
         if edited_shop.user_id != login_session['user_id']:
             return ("<script>function myFunction()"
                     "{alert"
@@ -1072,12 +1072,12 @@ def edit_shop(shop_id):
 def delete_shop(shop_id):
     if 'username' not in login_session:
         return redirect('/login')
-    shop = sess.query(Shop) \
-        .filter_by(id=shop_id) \
-        .one()
     if sess.query(Shop) \
         .filter_by(id=shop_id) \
             .count():
+        shop = sess.query(Shop) \
+            .filter_by(id=shop_id) \
+            .one()
         if shop.user_id != login_session['user_id']:
             return ("<script>function myFunction()"
                     "{alert"
@@ -1257,13 +1257,12 @@ def new_manufacturer():
 def edit_manufacturer(manufacturer_id):
     if 'username' not in login_session:
         return redirect('/login')
-    edited_manufacturer = sess.query(Manufacturer) \
-        .filter_by(id=manufacturer_id) \
-        .one()
     if sess.query(Manufacturer) \
             .filter_by(id=manufacturer_id) \
             .count():
-
+        edited_manufacturer = sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .one()
         if edited_manufacturer.user_id != login_session['user_id']:
             return ("<script>function myFunction()"
                     "{alert"
@@ -1336,12 +1335,12 @@ def edit_manufacturer(manufacturer_id):
 def delete_manufacturer(manufacturer_id):
     if 'username' not in login_session:
         return redirect('/login')
-    manufacturer = sess.query(Manufacturer) \
-        .filter_by(id=manufacturer_id) \
-        .one()
     if sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
             .count():
+        manufacturer = sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .one()
         if manufacturer.user_id != login_session['user_id']:
             return ("<script>function myFunction()"
                     "{alert"
@@ -1371,11 +1370,11 @@ def delete_manufacturer(manufacturer_id):
                                     ))
         else:
             return render_template(
-                    'manufacturer/deleteconfirmation_manufacturer.html',
-                    manufacturer=manufacturer,
-                    menu_categories=menu_categories,
-                    menu_shops=menu_shops,
-                    menu_manufacturers=menu_manufacturers
+                'manufacturer/deleteconfirmation_manufacturer.html',
+                manufacturer=manufacturer,
+                menu_categories=menu_categories,
+                menu_shops=menu_shops,
+                menu_manufacturers=menu_manufacturers
             )
         pass
     else:
