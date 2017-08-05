@@ -381,8 +381,7 @@ def category(category_id):
         .order_by(Manufacturer.id) \
         .all()
 
-    if 'username' not in login_session \
-            or creator.id != login_session['user_id']:
+    if creator.id != login_session['user_id']:
         return render_template('category/category_public.html',
                                creator=creator,
                                item=items,
@@ -393,12 +392,12 @@ def category(category_id):
     else:
         if creator.id == login_session['user_id']:
             return render_template('category/category.html',
-                               creator=creator,
-                               item=items,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
+                                   creator=creator,
+                                   item=items,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
     return redirect(url_for('index'))
     pass
 
