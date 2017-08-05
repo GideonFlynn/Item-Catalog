@@ -24,7 +24,9 @@
         </div>
 
     {% endfor %}
-
+                <div class="form-row">
+                    <a class="submit-btn w-button" href="{{ url_for('new_item', category_id = category.id) }}">Tilføj produkt</a>
+                </div>
     </main>
 
 {% endblock %}

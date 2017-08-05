@@ -391,13 +391,15 @@ def category(category_id):
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
     else:
-        return render_template('category/category.html',
+        if creator.id == login_session['user_id']:
+            return render_template('category/category.html',
                                creator=creator,
                                item=items,
                                category=category,
                                menu_categories=menu_categories,
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
+    return redirect(url_for('index'))
     pass
 
 
