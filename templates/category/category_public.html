@@ -9,9 +9,10 @@
     {% for item in item %}
 
         <div class="card">
-            <img class="image" src="../../static/uploads/images/{{ item.up_file }}">
-            <h3 class="card-title">{{ item.name }}</h3>
-            <p class="card-subtitle">{{ item.description }}</p>
+            <a href="{{ url_for('u_items', category_id = category.id, item_id = item.id) }}">
+                <img class="image" src="../../static/uploads/images/{{ item.up_file }}">
+                <h3 class="card-title">{{ item.name }}</h3>
+                 <p class="card-subtitle">{{ item.description }}</p></a>
             <div class="card-actions w-clearfix">
                 <div class="card-actions-container w-clearfix">
                     <a class="card-ingredients w-button"
