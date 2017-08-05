@@ -464,6 +464,14 @@ def new_category():
 @app.route('/category/<int:category_id>/edit', methods=['GET', 'POST'])
 def edit_category(category_id):
     edited_category = sess.query(Category).filter_by(id=category_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if edited_category.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert('You are not authorized to edit this category.');}"
+                "</script>"
+                "<body onload='myFunction()''>",
+                redirect(url_for('index')))
 
     """Menu queries"""
     menu_categories = sess.query(Category) \
@@ -475,20 +483,6 @@ def edit_category(category_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-    if 'username' not in login_session:
-        return redirect('/login')
-
-    if edited_category.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert('You are not authorized to edit this category.');}"
-                "</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
-
 
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -545,7 +539,14 @@ def delete_category(category_id):
     category = sess.query(Category) \
         .filter_by(id=category_id) \
         .one()
-
+    if 'username' not in login_session:
+        return redirect('/login')
+    if category.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert('You are not authorized to delete this category.');}"
+                "</script>"
+                "<body onload='myFunction()''>",
+                redirect(url_for('index')))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -556,28 +557,10 @@ def delete_category(category_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-    if 'username' not in login_session:
-        return redirect('/login')
-
-    if category.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert('You are not authorized to delete this category.');}"
-                "</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                )))
-
     if request.method == 'POST':
         sess.delete(category)
         sess.commit()
-        return redirect(url_for('index',
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                ))
+        return redirect(url_for('index'))
     else:
         return render_template('category/deleteconfirmation_category.html',
                                category=category,
@@ -722,7 +705,15 @@ def new_item(category_id):
            methods=['GET', 'POST'])
 def edit_item(category_id, item_id):
     category = sess.query(Category).filter_by(id=category_id).one()
-
+    if 'username' not in login_session:
+        return redirect('/login')
+    if category.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to edit items in this category.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect(url_for('index')))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -733,21 +724,6 @@ def edit_item(category_id, item_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-    if 'username' not in login_session:
-        return redirect('/login')
-
-    if category.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert"
-                "('You are not authorized to edit items in this category.')"
-                ";}</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
-
 
     edited_item = sess.query(Item) \
         .filter_by(id=item_id) \
@@ -830,20 +806,12 @@ def delete_item(category_id, item_id):
                 "('You are not authorized to delete from this category.')"
                 ";}</script>"
                 "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
+                redirect(url_for('index')))
 
     if request.method == 'POST':
         sess.delete(item_to_delete)
         sess.commit()
-        return redirect(url_for('index',
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                ))
+        return redirect(url_for('index'))
     else:
         return render_template('item/deleteconfirmation_item.html',
                                item=item_to_delete,
@@ -986,6 +954,15 @@ def edit_shop(shop_id):
     edited_shop = sess.query(Shop) \
         .filter_by(id=shop_id) \
         .one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if edited_shop.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to edit this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect(url_for('index')))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -996,19 +973,6 @@ def edit_shop(shop_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-    if 'username' not in login_session:
-        return redirect('/login')
-    if edited_shop.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert"
-                "('You are not authorized to edit this entry.')"
-                ";}</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
 
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -1064,6 +1028,15 @@ def delete_shop(shop_id):
     shop = sess.query(Shop) \
         .filter_by(id=shop_id) \
         .one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if shop.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to delete this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -1074,19 +1047,6 @@ def delete_shop(shop_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-    if 'username' not in login_session:
-        return redirect('/login')
-    if shop.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert"
-                "('You are not authorized to delete this entry.')"
-                ";}</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
 
     if request.method == 'POST':
         sess.delete(shop)
@@ -1243,7 +1203,15 @@ def edit_manufacturer(manufacturer_id):
     edited_manufacturer = sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
         .one()
-
+    if 'username' not in login_session:
+        return redirect('/login')
+    if edited_manufacturer.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to edit this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -1254,21 +1222,6 @@ def edit_manufacturer(manufacturer_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-
-    if 'username' not in login_session:
-        return redirect('/login')
-
-    if edited_manufacturer.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert"
-                "('You are not authorized to edit this entry.')"
-                ";}</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
 
     if request.method == 'POST':
         if 'file' not in request.files:
@@ -1324,6 +1277,15 @@ def delete_manufacturer(manufacturer_id):
     manufacturer = sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
         .one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if manufacturer.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to delete this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
 
     """Menu queries"""
     menu_categories = sess.query(Category) \
@@ -1336,21 +1298,6 @@ def delete_manufacturer(manufacturer_id):
         .order_by(Manufacturer.id) \
         .all()
 
-    if 'username' not in login_session:
-        return redirect('/login')
-
-    if manufacturer.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert"
-                "('You are not authorized to delete this entry.')"
-                ";}</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index',
-                                 menu_categories=menu_categories,
-                                 menu_shops=menu_shops,
-                                 menu_manufacturers=menu_manufacturers
-                                 )))
-
     if request.method == 'POST':
         sess.delete(manufacturer)
         sess.commit()
@@ -1361,11 +1308,11 @@ def delete_manufacturer(manufacturer_id):
                                 ))
     else:
         return render_template(
-            'manufacturer/deleteconfirmation_manufacturer.html',
-            manufacturer=manufacturer,
-            menu_categories=menu_categories,
-            menu_shops=menu_shops,
-            menu_manufacturers=menu_manufacturers
+                'manufacturer/deleteconfirmation_manufacturer.html',
+                manufacturer=manufacturer,
+                menu_categories=menu_categories,
+                menu_shops=menu_shops,
+                menu_manufacturers=menu_manufacturers
         )
     pass
 
