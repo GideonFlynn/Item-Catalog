@@ -597,11 +597,9 @@ Item routes
 def u_items(category_id, item_id):
     if sess.query(Category.id).filter_by(id=category_id).count():
         category = sess.query(Category).filter_by(id=category_id).one()
-        item = sess.query(Item).filter_by(
-            category=category_id, id=item_id).one()
-    else:
-        return redirect(url_for('index'))
-    if sess.query(Item).filter_by(category=category_id, id=item_id).count():
+        if sess.query(Item).filter_by(category=category_id, id=item_id).count():
+            item = sess.query(Item).filter_by(
+                category=category_id, id=item_id).one()
         """Menu queries"""
         menu_categories = sess.query(Category) \
             .order_by(Category.id) \
@@ -645,7 +643,6 @@ def new_item(category_id):
     if sess.query(Category) \
         .filter_by(id=category_id) \
             .count():
-
         category = sess.query(Category) \
             .filter_by(id=category_id) \
             .one()
