@@ -1,12 +1,22 @@
-{% extends 'main.html' %}
-{% block content %}
+{% extends "main.html" %}
+{% block body %}
 
-    <div class="categories shop">
-        <h1 class="heading-2">{{ shop.name }}</h1>
-        <p class="paragraph-2"></p>
-        <div class="image shop-image"><img src="../../static/uploads/images/{{ shop.up_file }}"></div>
-        <div class="divider"></div>
-        <p class="paragraph-3">{{ shop.description }}</p>
-    </div>
+    <main class="card-container">
+    {% for shop in shops %}
+
+        <div class="card">
+                <a href="{{ url_for('u_shop', shop_id = shop.id) }}">
+                    <img class="image" src="../../static/uploads/images/{{ shop.up_file }}">
+                <h3 class="card-title">{{ shop.name }}</h3>
+                <p class="card-subtitle">{{ shop.description }}</p></a>
+                <div class="card-actions w-clearfix">
+                    <div class="card-actions-container w-clearfix">
+                    </div>
+                </div>
+            </div>
+
+    {% endfor %}
+
+    </main>
 
 {% endblock %}
