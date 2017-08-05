@@ -730,16 +730,16 @@ a {
   }
   .menu-button {
     position: fixed;
-    right: 0px;
+    left: 0px;
     bottom: 0px;
     z-index: 10;
     margin-right: 16px;
     margin-bottom: 16px;
-    margin-left: 24px;
+    margin-left: 16px;
   }
   .menu-button.w--open {
     position: fixed;
-    right: 0px;
+    left: 0px;
     bottom: 0px;
     z-index: 10;
   }
@@ -884,8 +884,8 @@ a {
 
 @media (max-width: 767px) {
   .menu-button {
-    margin-right: 16px;
     margin-bottom: 16px;
+    margin-left: 8px;
   }
   .icon {
     font-size: 52px;
@@ -936,7 +936,6 @@ a {
 
 @media (max-width: 479px) {
   .menu-button {
-    margin-right: 8px;
     margin-bottom: 8px;
   }
   .nav-help-btn {

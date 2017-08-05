@@ -1174,7 +1174,7 @@
                         d(r), r.complete = p(r), r.leave = m(r), r.moveOutside = g(r), i.off(T), r.toggle.off(
                             T), a(r), r.nav && r.nav.off(T), r.nav = i.closest(".w-nav"), r.nav.on(E, s(r)),
                         b ? i.on("setting" + T, s(r)) : (r.toggle.on("tap" + T, u(r)), r.config.hover && r.toggle
-                            .on("mouseenter" + T, v(r)), i.on(E, s(r)), _ && l(r))
+                        .on("mouseenter" + T, v(r)), i.on(E, s(r)), _ && (r.hovering = !1, l(r)))
                 }
 
                 function a(t) {
