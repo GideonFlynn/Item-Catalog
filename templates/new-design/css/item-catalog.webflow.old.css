@@ -190,6 +190,9 @@
   min-width: 100%;
   background-color: #fff;
 }
+.big {
+  height: 380px;
+}
 
 .card-title {
   margin: 24px 16px 0px;
@@ -692,15 +695,16 @@
   }
   .menu-button {
     position: fixed;
-    left: 0px;
+    right: 0px;
     bottom: 0px;
     z-index: 10;
+    margin-right: 16px;
     margin-bottom: 16px;
-    margin-left: 16px;
+    margin-left: 24px;
   }
   .menu-button.w--open {
     position: fixed;
-    left: 0px;
+    right: 0px;
     bottom: 0px;
     z-index: 10;
   }
@@ -841,8 +845,8 @@
 
 @media (max-width: 767px) {
   .menu-button {
+    margin-right: 16px;
     margin-bottom: 16px;
-    margin-left: 8px;
   }
   .icon {
     font-size: 52px;
@@ -898,6 +902,7 @@
 
 @media (max-width: 479px) {
   .menu-button {
+    margin-right: 8px;
     margin-bottom: 8px;
   }
   .nav-help-btn {
