@@ -628,13 +628,7 @@ def new_item(category_id):
         .one()
     if 'username' and 'user_id' not in login_session:
         return redirect('/login')
-    if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to add items to this category.')" \
-               ";}" \
-               "</script>" \
-               "<body onload='myFunction()''>"
+
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -645,6 +639,19 @@ def new_item(category_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
+    if category.user_id != login_session['user_id']:
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to add items to this category.')"
+                ";}"
+                "</script>"
+                "<body onload='myFunction()''>",
+                redirect(url_for('category',
+                                 category_id=category.id,
+                                 menu_categories=menu_categories,
+                                 menu_shops=menu_shops,
+                                 menu_manufacturers=menu_manufacturers
+                                 )))
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -761,8 +768,8 @@ def edit_item(category_id, item_id):
             edited_item.ingredients = request.form['ingredients']
         sess.add(edited_item)
         sess.commit()
-        return redirect(url_for('u_items',
-                                category_id=category_id,
+        return redirect(url_for('category',
+                                category_id=category.id,
                                 item_id=edited_item.id))
     return render_template('item/item_edit.html',
                            category=category,
@@ -779,7 +786,7 @@ def edit_item(category_id, item_id):
 @app.route('/category/<int:category_id>/items/<int:item_id>/delete',
            methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
-    category = sess.query(Category.id) \
+    category = sess.query(Category) \
         .filter_by(id=category_id) \
         .one()
     item_to_delete = sess.query(Item) \
@@ -820,7 +827,7 @@ def delete_item(category_id, item_id):
     else:
         return render_template('item/deleteconfirmation_item.html',
                                item=item_to_delete,
-                               category_id=category,
+                               category_id=category.id,
                                menu_categories=menu_categories,
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
