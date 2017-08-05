@@ -346,19 +346,12 @@ def index():
     print user_id
     creator_id = sess.query(Category.user_id).filter_by(user_id=user_id).all()
     print creator_id
-    if user_id != creator_id:
-        return render_template('category/category_index_public.html',
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    else:
-        return render_template('category/category_index.html',
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-        pass
+    return render_template('category/category_index.html',
+                           category=category,
+                           menu_categories=menu_categories,
+                           menu_shops=menu_shops,
+                           menu_manufacturers=menu_manufacturers)
+    pass
 
 
 @rate_limit(limit=30, per=30 * 1)
