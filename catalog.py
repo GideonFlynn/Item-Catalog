@@ -330,7 +330,6 @@ Index/category routes
 @app.route('/category/')
 @app.route('/')
 def index():
-
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -343,10 +342,6 @@ def index():
         .all()
     category = sess.query(Category) \
         .all()
-    user_id = login_session['user_id']
-    print user_id
-    creator_id = sess.query(Category.user_id).filter_by(user_id=user_id).all()
-    print creator_id
     return render_template('category/category_index_public.html',
                            category=category,
                            menu_categories=menu_categories,
