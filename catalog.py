@@ -467,11 +467,11 @@ def edit_category(category_id):
     if 'username' not in login_session:
         return redirect('/login')
     if edited_category.user_id != login_session['user_id']:
-        return ("<script>function myFunction()"
-                "{alert('You are not authorized to edit this category.');}"
-                "</script>"
-                "<body onload='myFunction()''>",
-                redirect(url_for('index')))
+        "<script>function myFunction()" \
+            "{alert('You are not authorized to edit this category.');}" \
+            "</script>" \
+            "<body onload='myFunction()''>"
+        return redirect(url_for('index'))
 
     """Menu queries"""
     menu_categories = sess.query(Category) \
