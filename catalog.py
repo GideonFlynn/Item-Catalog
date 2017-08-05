@@ -329,6 +329,7 @@ Index/category routes
 @app.route('/category/')
 @app.route('/')
 def index():
+
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -341,7 +342,8 @@ def index():
         .all()
     category = sess.query(Category) \
         .all()
-    if 'username' not in login_session:
+    creator = get_user_info(category.user_id)
+    if creator.id != login_session['user_id']:
         return render_template('category/category_index_public.html',
                                category=category,
                                menu_categories=menu_categories,
@@ -390,7 +392,6 @@ def category(category_id):
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
     else:
-        if creator.id == login_session['user_id']:
             return render_template('category/category.html',
                                    creator=creator,
                                    item=items,
@@ -398,7 +399,6 @@ def category(category_id):
                                    menu_categories=menu_categories,
                                    menu_shops=menu_shops,
                                    menu_manufacturers=menu_manufacturers)
-    return redirect(url_for('index'))
     pass
 
 
@@ -471,10 +471,11 @@ def edit_category(category_id):
     if 'username' not in login_session:
         return redirect('/login')
     if edited_category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to edit this category.');}" \
-               "</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert('You are not authorized to edit this category.');}"
+                "</script>"
+                "<body onload='myFunction()''>",
+                redirect('/index'))
 
     """Menu queries"""
     menu_categories = sess.query(Category) \
@@ -545,10 +546,11 @@ def delete_category(category_id):
     if 'username' not in login_session:
         return redirect('/login')
     if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to delete this category.');}" \
-               "</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert('You are not authorized to delete this category.');}"
+                "</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -714,11 +716,12 @@ def edit_item(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
     if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to edit items in this category.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to edit items in this category.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -970,11 +973,12 @@ def edit_shop(shop_id):
     if 'username' not in login_session:
         return redirect('/login')
     if edited_shop.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to edit this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to edit this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -1043,10 +1047,12 @@ def delete_shop(shop_id):
     if 'username' not in login_session:
         return redirect('/login')
     if shop.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to delete this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to delete this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -1216,10 +1222,12 @@ def edit_manufacturer(manufacturer_id):
     if 'username' not in login_session:
         return redirect('/login')
     if edited_manufacturer.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to edit this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to edit this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -1288,10 +1296,12 @@ def delete_manufacturer(manufacturer_id):
     if 'username' not in login_session:
         return redirect('/login')
     if manufacturer.user_id != login_session['user_id']:
-        return "<script>function myFunction() " \
-               "{alert('You are not authorized to delete this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+        return ("<script>function myFunction()"
+                "{alert"
+                "('You are not authorized to delete this entry.')"
+                ";}</script>"
+                "<body onload='myFunction()''>",
+                redirect('/login'))
 
     """Menu queries"""
     menu_categories = sess.query(Category) \
@@ -1507,7 +1517,7 @@ def gconnect():
 
     output = '<section class="form-section">'
     output += '<div class="form-container">'
-    output += '<h1>Welcome, '
+    output += '<h1 class="form-header">Welcome, '
     output += login_session['username']
     output += '!</h1>'
     output += '<img src="'
@@ -1609,7 +1619,7 @@ def disconnect():
             del login_session['picture']
             credentials = login_session.get('credentials')
             if credentials is None:
-                redirect('/login')
+                redirect('/index')
             access_token = credentials
             url = 'https://accounts.google.com/o/oauth2/' \
                   'revoke?token=%s' \
