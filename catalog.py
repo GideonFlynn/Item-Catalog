@@ -1150,7 +1150,7 @@ def u_manufacturer(manufacturer_id):
         .one()
     if sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
-        .one():
+            .count():
 
         creator = get_user_info(manufacturer.user_id)
         """"Menu queries"""
