@@ -363,7 +363,7 @@ def category(category_id):
     category = sess.query(Category) \
         .filter_by(id=category_id) \
         .one()
-    if sess.query(category.exists().scalar()):
+    if sess.query(literal(True)).filter(category.exists()).scalar():
         return redirect(url_for('index'))
     else:
         creator = get_user_info(category.user_id)
@@ -469,7 +469,7 @@ def edit_category(category_id):
     if 'username' not in login_session:
         return redirect('/login')
     edited_category = sess.query(Category).filter_by(id=category_id).one()
-    if sess.query(edit_category.exists().scalar()):
+    if sess.query(literal(True)).filter(edit_category.exists()).scalar():
         return redirect(url_for('index'))
     if edited_category.user_id != login_session['user_id']:
         "<script>function myFunction()" \
@@ -586,6 +586,13 @@ Item routes
 @app.route('/category/<int:category_id>/items/<int:item_id>',
            methods=['GET', 'POST'])
 def u_items(category_id, item_id):
+    category = sess.query(Category).filter_by(id=category_id).one()
+    if sess.query(literal(True)).filter(edit_category.exists()).scalar():
+        return redirect(url_for('index'))
+    item = sess.query(Item).filter_by(
+        category=category_id, id=item_id).one()
+    if sess.query(literal(True)).filter(item.exists()).scalar():
+        return redirect(url_for('index'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
         .order_by(Category.id) \
@@ -596,13 +603,6 @@ def u_items(category_id, item_id):
     menu_manufacturers = sess.query(Manufacturer) \
         .order_by(Manufacturer.id) \
         .all()
-    category = sess.query(Category).filter_by(id=category_id).one()
-    if sess.query(category.exists().scalar()):
-        return redirect(url_for('index'))
-    item = sess.query(Item).filter_by(
-            category=category_id, id=item_id).one()
-    if sess.query(item.exists().scalar()):
-        return redirect(url_for('index'))
     creator = get_user_info(category.user_id)
     if 'username' not in login_session \
             or creator.id != login_session['user_id']:
@@ -720,7 +720,7 @@ def edit_item(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
     category = sess.query(Category).filter_by(id=category_id).one()
-    if sess.query(category.exists().scalar()):
+    if sess.query(literal(True)).filter(category.exists()).scalar():
         return redirect(url_for('index'))
     edited_item = sess.query(Item) \
         .filter_by(id=item_id) \
@@ -877,7 +877,7 @@ def all_shops():
 @app.route('/shop/<int:shop_id>/', methods=['GET', 'POST'])
 def u_shop(shop_id):
     shop = sess.query(Shop).filter_by(id=shop_id).one()
-    if sess.query(shop.exists().scalar()):
+    if sess.query(literal(True)).filter(shop.exists()).scalar():
         return redirect(url_for('index'))
     """Menu queries"""
     menu_categories = sess.query(Category) \
@@ -981,7 +981,7 @@ def edit_shop(shop_id):
     edited_shop = sess.query(Shop) \
         .filter_by(id=shop_id) \
         .one()
-    if sess.query(edited_shop.exists().scalar()):
+    if sess.query(literal(True)).filter(edited_shop.exists()).scalar():
         return redirect(url_for('index'))
 
     if edited_shop.user_id != login_session['user_id']:
@@ -1132,7 +1132,7 @@ def u_manufacturer(manufacturer_id):
     manufacturer = sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
         .one()
-    if sess.query(manufacturer.exists().scalar()):
+    if sess.query(literal(True)).filter(manufacturer.exists()).scalar():
         return redirect(url_for('index'))
     creator = get_user_info(manufacturer.user_id)
     """"Menu queries"""
@@ -1237,7 +1237,7 @@ def edit_manufacturer(manufacturer_id):
     edited_manufacturer = sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
         .one()
-    if sess.query(edit_manufacturer.exists().scalar()):
+    if sess.query(literal(True)).filter(edit_manufacturer.exists()).scalar():
         return redirect(url_for('index'))
     if edited_manufacturer.user_id != login_session['user_id']:
         return ("<script>function myFunction()"
