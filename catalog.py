@@ -1145,13 +1145,13 @@ def all_manufacturers():
 @app.route('/manufacturer/<int:manufacturer_id>/',
            methods=['GET', 'POST'])
 def u_manufacturer(manufacturer_id):
-    manufacturer = sess.query(Manufacturer) \
-        .filter_by(id=manufacturer_id) \
-        .one()
+
     if sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
             .count():
-
+        manufacturer = sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .one()
         creator = get_user_info(manufacturer.user_id)
         """"Menu queries"""
         menu_categories = sess.query(Category) \
