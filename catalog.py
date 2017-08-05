@@ -342,8 +342,9 @@ def index():
         .all()
     category = sess.query(Category) \
         .all()
-    creator = get_user_info(category.user_id)
-    if creator.id != login_session['user_id']:
+    user_id = login_session['user_id']
+    creator_id = sess.query(Category.user_id).filter_by(user_id).all()
+    if user_id != creator_id:
         return render_template('category/category_index_public.html',
                                category=category,
                                menu_categories=menu_categories,
