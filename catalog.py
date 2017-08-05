@@ -827,7 +827,7 @@ def delete_item(category_id, item_id):
     else:
         return render_template('item/deleteconfirmation_item.html',
                                item=item_to_delete,
-                               category_id=category,
+                               category=category,
                                menu_categories=menu_categories,
                                menu_shops=menu_shops,
                                menu_manufacturers=menu_manufacturers)
