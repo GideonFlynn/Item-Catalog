@@ -14,8 +14,7 @@ from flask import Flask, abort, flash, g, jsonify, make_response, \
 from flask_httpauth import HTTPBasicAuth
 from oauth2client.client import FlowExchangeError, flow_from_clientsecrets
 from redis import Redis
-from sqlalchemy import create_engine, literal
-from sqlalchemy import exists as exist
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from dbmodels import Base, Category, Item, Manufacturer, Shop, User
