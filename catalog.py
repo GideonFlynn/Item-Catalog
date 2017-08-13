@@ -341,19 +341,12 @@ def index():
         .all()
     category = sess.query(Category) \
         .all()
-    if 'username' not in login_session:
-        return render_template('category/category_index_public.html',
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    else:
-        return render_template('category/category_index.html',
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-        pass
+    return render_template('category/category_index_public.html',
+                           category=category,
+                           menu_categories=menu_categories,
+                           menu_shops=menu_shops,
+                           menu_manufacturers=menu_manufacturers)
+    pass
 
 
 @rate_limit(limit=30, per=30 * 1)
@@ -362,43 +355,50 @@ def index():
            methods=['GET'])
 def category(category_id):
     # Show items based on category id
-    category = sess.query(Category) \
+    if sess.query(Category) \
         .filter_by(id=category_id) \
-        .one()
-    creator = get_user_info(category.user_id)
-    items = sess.query(Item) \
-        .filter_by(category=category_id) \
-        .all()
+            .count():
 
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+        category = sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one()
 
-    if 'username' not in login_session \
-            or creator.id != login_session['user_id']:
-        return render_template('category/category_public.html',
-                               creator=creator,
-                               item=items,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
+        creator = get_user_info(category.user_id)
+        items = sess.query(Item) \
+            .filter_by(category=category_id) \
+            .all()
+
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+
+        if creator.id != login_session['user_id']:
+            return render_template('category/category_public.html',
+                                   creator=creator,
+                                   item=items,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+        else:
+            return render_template('category/category.html',
+                                   creator=creator,
+                                   item=items,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+
     else:
-        return render_template('category/category.html',
-                               creator=creator,
-                               item=items,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    pass
+            return redirect(url_for('index'))
+pass
 
 
 @auth.login_required
@@ -466,114 +466,110 @@ def new_category():
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/category/<int:category_id>/edit', methods=['GET', 'POST'])
 def edit_category(category_id):
-    edited_category = sess.query(Category).filter_by(id=category_id).one()
     if 'username' not in login_session:
         return redirect('/login')
-    if edited_category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to edit this category.');}" \
-               "</script>" \
-               "<body onload='myFunction()''>"
+    if sess.query(Category.id).filter_by(id=category_id).count():
+        edited_category = sess.query(Category).filter_by(id=category_id).one()
+        if edited_category.user_id != login_session['user_id']:
+            return redirect(url_for('index'))
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+            if file and allowed_file(file.filename):
+                target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
+                # target = os.path.join(APP_ROOT, 'static/')
+                print(target)
+                if not os.path.isdir(target):
+                    os.mkdir(target)
+                else:
+                    print("Couldn't create upload directory: {}".format(target))
+                print(request.files.getlist("file"))
+                for upload in request.files.getlist("file"):
+                    print(upload)
+                    print("{} is the file name".format(upload.filename))
+                    filename = upload.filename
+                    destination = "/".join([target, filename])
+                    print ("Accept incoming file:", filename)
+                    print ("Save it to:", destination)
+                    upload.save(destination)
+                    print(destination)
+                    edited_category.up_file = upload.filename
+            if request.form['name']:
+                edited_category.name = request.form['name']
+            if request.form['description']:
+                edited_category.description = request.form['description']
+            # check if the post request has the file part
+            sess.add(edited_category)
+            sess.commit()
+            return redirect(url_for('category', category_id=category_id))
+        else:
+            return render_template('category/category_edit.html',
+                                   category_id=category_id,
+                                   category=edited_category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
 
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-        if file and allowed_file(file.filename):
-            target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
-            # target = os.path.join(APP_ROOT, 'static/')
-            print(target)
-            if not os.path.isdir(target):
-                os.mkdir(target)
-            else:
-                print("Couldn't create upload directory: {}".format(target))
-            print(request.files.getlist("file"))
-            for upload in request.files.getlist("file"):
-                print(upload)
-                print("{} is the file name".format(upload.filename))
-                filename = upload.filename
-                destination = "/".join([target, filename])
-                print ("Accept incoming file:", filename)
-                print ("Save it to:", destination)
-                upload.save(destination)
-                print(destination)
-                edited_category.up_file = upload.filename
-        if request.form['name']:
-            edited_category.name = request.form['name']
-        if request.form['description']:
-            edited_category.description = request.form['description']
-        # check if the post request has the file part
-        sess.add(edited_category)
-        sess.commit()
-        return redirect(url_for('category', category_id=category_id))
     else:
-        return render_template('category/category_edit.html',
-                               category_id=category_id,
-                               category=edited_category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
+        return redirect(url_for('index'))
     pass
-
 
 @auth.login_required
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/category/<int:category_id>/delete',
            methods=['GET', 'POST'])
 def delete_category(category_id):
+    if 'username' not in login_session:
+        return redirect('/login')
     category = sess.query(Category) \
         .filter_by(id=category_id) \
         .one()
-    if 'username' not in login_session:
-        return redirect('/login')
-    if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to delete this category.');}" \
-               "</script>" \
-               "<body onload='myFunction()''>"
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
-    if request.method == 'POST':
-        sess.delete(category)
-        sess.commit()
-        return redirect(url_for('index',
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                ))
+    if sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one():
+        if category.user_id != login_session['user_id']:
+            return redirect(url_for('index'))
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+        if request.method == 'POST':
+            sess.delete(category)
+            sess.commit()
+            return redirect(url_for('index'))
+        else:
+            return render_template('category/deleteconfirmation_category.html',
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+        pass
     else:
-        return render_template('category/deleteconfirmation_category.html',
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    pass
-
+        return redirect(url_for('index'))
 
 """
 Item routes
@@ -584,37 +580,41 @@ Item routes
 @app.route('/category/<int:category_id>/items/<int:item_id>',
            methods=['GET', 'POST'])
 def u_items(category_id, item_id):
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
-    category = sess.query(Category).filter_by(id=category_id).one()
-    item = sess.query(Item).filter_by(
+    if sess.query(Category.id).filter_by(id=category_id).count():
+        category = sess.query(Category).filter_by(id=category_id).one()
+    if sess.query(Item).filter_by(category=category_id, id=item_id).count():
+        item = sess.query(Item).filter_by(
             category=category_id, id=item_id).one()
-    creator = get_user_info(category.user_id)
-    if 'username' not in login_session \
-            or creator.id != login_session['user_id']:
-        return render_template('item/item_public.html',
-                               creator=creator,
-                               item=item,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+        creator = get_user_info(category.user_id)
+        if 'username' not in login_session \
+                or creator.id != login_session['user_id']:
+            return render_template('item/item_public.html',
+                                   creator=creator,
+                                   item=item,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+        else:
+            return render_template('item/item.html',
+                                   item=item,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
     else:
-        return render_template('item/item.html',
-                               item=item,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
+            return redirect(url_for('index'))
     pass
 
 
@@ -623,205 +623,224 @@ def u_items(category_id, item_id):
 @app.route('/category/<int:category_id>/items/new',
            methods=['GET', 'POST'])
 def new_item(category_id):
-    category = sess.query(Category) \
-        .filter_by(id=category_id) \
-        .one()
     if 'username' and 'user_id' not in login_session:
         return redirect('/login')
-    if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to add items to this category.')" \
-               ";}" \
-               "</script>" \
-               "<body onload='myFunction()''>"
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-        if file and allowed_file(file.filename):
-            target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
-            # target = os.path.join(APP_ROOT, 'static/')
-            print(target)
-            if not os.path.isdir(target):
-                os.mkdir(target)
-            else:
-                print("Couldn't create upload directory: {}".format(target))
-            print(request.files.getlist("file"))
-            for upload in request.files.getlist("file"):
-                print(upload)
-                print("{} is the file name".format(upload.filename))
-                filename = upload.filename
-                destination = "/".join([target, filename])
-                print ("Accept incoming file:", filename)
-                print ("Save it to:", destination)
-                upload.save(destination)
-                print(destination)
-        new_item = Item(name=request.form['name'],
-                        description=request.form['description'],
-                        category=category_id,
-                        ingredients=request.form['ingredients'],
-                        up_file=upload.filename,
-                        m_id=request.form['manufacturer_id'],
-                        s_id=request.form['shop_id'],
-                        user_id=login_session['user_id'])
-        sess.add(new_item)
-        sess.commit()
+    if sess.query(Category) \
+        .filter_by(id=category_id) \
+            .count():
+        category = sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one()
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+        if category.user_id != login_session['user_id']:
+            return ("<script>function myFunction()"
+                    "{alert"
+                    "('You are not authorized to add items to this category.')"
+                    ";}"
+                    "</script>"
+                    "<body onload='myFunction()''>",
+                    redirect(url_for('category',
+                                     category_id=category.id,
+                                     menu_categories=menu_categories,
+                                     menu_shops=menu_shops,
+                                     menu_manufacturers=menu_manufacturers
+                                     )))
+        if request.method == 'POST':
+            # check if the post request has the file part
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+            if file and allowed_file(file.filename):
+                target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
+                # target = os.path.join(APP_ROOT, 'static/')
+                print(target)
+                if not os.path.isdir(target):
+                    os.mkdir(target)
+                else:
+                    print("Couldn't create upload directory: {}".format(target))
+                print(request.files.getlist("file"))
+                for upload in request.files.getlist("file"):
+                    print(upload)
+                    print("{} is the file name".format(upload.filename))
+                    filename = upload.filename
+                    destination = "/".join([target, filename])
+                    print ("Accept incoming file:", filename)
+                    print ("Save it to:", destination)
+                    upload.save(destination)
+                    print(destination)
+            new_item = Item(name=request.form['name'],
+                            description=request.form['description'],
+                            category=category_id,
+                            ingredients=request.form['ingredients'],
+                            up_file=upload.filename,
+                            m_id=request.form['manufacturer_id'],
+                            s_id=request.form['shop_id'],
+                            user_id=login_session['user_id'])
+            sess.add(new_item)
+            sess.commit()
 
-        return redirect(url_for('category',
-                                category_id=category.id))
+            return redirect(url_for('u_items',
+                                    category_id=category.id,
+                                    item_id=new_item.id))
+        else:
+            return render_template('item/item_new.html',
+                                   category_id=category.id,
+                                   category_name=category.name,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
+        pass
     else:
-        return render_template('item/item_new.html',
-                               category_id=category.id,
-                               category_name=category.name,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
-    pass
-
+        return redirect(url_for('index'))
 
 @auth.login_required
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/category/<int:category_id>/items/<int:item_id>/edit',
            methods=['GET', 'POST'])
 def edit_item(category_id, item_id):
-    category = sess.query(Category).filter_by(id=category_id).one()
     if 'username' not in login_session:
         return redirect('/login')
-    if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to edit items in this category.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+    if sess.query(Category.id).filter_by(id=category_id).count():
+        category = sess.query(Category).filter_by(id=category_id).one()
+    else:
+        return redirect(url_for('index'))
+    if sess.query(Item) \
+            .filter_by(id=item_id) \
+            .count():
+        edited_item = sess.query(Item) \
+            .filter_by(id=item_id) \
+            .one()
+        if category.user_id != login_session['user_id']:
+            return ("<script>function myFunction()"
+                    "{alert"
+                    "('You are not authorized to edit items in this category.')"
+                    ";}</script>"
+                    "<body onload='myFunction()''>",
+                    redirect(url_for('index')))
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    edited_item = sess.query(Item) \
-        .filter_by(id=item_id) \
-        .one()
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-        if file and allowed_file(file.filename):
-            target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
-            # target = os.path.join(APP_ROOT, 'static/')
-            print(target)
-            if not os.path.isdir(target):
-                os.mkdir(target)
-            else:
-                print("Couldn't create upload directory: {}".format(target))
-            print(request.files.getlist("file"))
-            for upload in request.files.getlist("file"):
-                print(upload)
-                print("{} is the file name".format(upload.filename))
-                filename = upload.filename
-                destination = "/".join([target, filename])
-                print ("Accept incoming file:", filename)
-                print ("Save it to:", destination)
-                upload.save(destination)
-                print(destination)
-                edited_item.up_file = upload.filename
-        if request.form['name']:
-            edited_item.name = request.form['name']
-        if request.form['description']:
-            edited_item.description = request.form['description']
-        if request.form['ingredients']:
-            edited_item.ingredients = request.form['ingredients']
-        sess.add(edited_item)
-        sess.commit()
-        return redirect(url_for('u_items',
-                                category_id=category_id,
-                                item_id=edited_item.id))
-    return render_template('item/item_edit.html',
-                           category=category,
-                           item=edited_item,
-                           menu_categories=menu_categories,
-                           menu_shops=menu_shops,
-                           menu_manufacturers=menu_manufacturers
-                           )
-    pass
-
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+            if file and allowed_file(file.filename):
+                target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
+                # target = os.path.join(APP_ROOT, 'static/')
+                print(target)
+                if not os.path.isdir(target):
+                    os.mkdir(target)
+                else:
+                    print("Couldn't create upload directory: {}".format(target))
+                print(request.files.getlist("file"))
+                for upload in request.files.getlist("file"):
+                    print(upload)
+                    print("{} is the file name".format(upload.filename))
+                    filename = upload.filename
+                    destination = "/".join([target, filename])
+                    print ("Accept incoming file:", filename)
+                    print ("Save it to:", destination)
+                    upload.save(destination)
+                    print(destination)
+                    edited_item.up_file = upload.filename
+            if request.form['name']:
+                edited_item.name = request.form['name']
+            if request.form['description']:
+                edited_item.description = request.form['description']
+            if request.form['ingredients']:
+                edited_item.ingredients = request.form['ingredients']
+            sess.add(edited_item)
+            sess.commit()
+            return redirect(url_for('category',
+                                    category_id=category.id,
+                                    item_id=edited_item.id))
+        return render_template('item/item_edit.html',
+                               category=category,
+                               item=edited_item,
+                               menu_categories=menu_categories,
+                               menu_shops=menu_shops,
+                               menu_manufacturers=menu_manufacturers
+                               )
+        pass
+    else:
+        return redirect(url_for('index'))
 
 @auth.login_required
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/category/<int:category_id>/items/<int:item_id>/delete',
            methods=['GET', 'POST'])
 def delete_item(category_id, item_id):
-    category = sess.query(Category) \
-        .filter_by(id=category_id) \
-        .one()
-    item_to_delete = sess.query(Item) \
-        .filter_by(id=item_id) \
-        .one()
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
     if 'username' not in login_session:
         return redirect('/login')
-    if category.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to delete from this category.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
-
-    if request.method == 'POST':
-        sess.delete(item_to_delete)
-        sess.commit()
-        return redirect(url_for('category',
-                                category_id=category.id,
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                ))
+    if sess.query(Category) \
+            .filter_by(id=category_id) \
+            .count():
+        category = sess.query(Category) \
+            .filter_by(id=category_id) \
+            .one()
+        item_to_delete = sess.query(Item) \
+            .filter_by(id=item_id) \
+            .one()
     else:
-        return render_template('item/deleteconfirmation_item.html',
-                               item=item_to_delete,
-                               category=category,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    pass
+        return redirect(url_for('index'))
+    if category.user_id != login_session['user_id']:
+        return redirect(url_for('index'))
+    if sess.query(Item) \
+            .filter_by(id=item_id) \
+            .count():
 
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+        if request.method == 'POST':
+            sess.delete(item_to_delete)
+            sess.commit()
+            return redirect(url_for('index'))
+        else:
+            return render_template('item/deleteconfirmation_item.html',
+                                   item=item_to_delete,
+                                   category=category,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+        pass
+    else:
+        return redirect(url_for('index'))
 
 """
 Shop routes
@@ -854,34 +873,37 @@ def all_shops():
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/shop/<int:shop_id>/', methods=['GET', 'POST'])
 def u_shop(shop_id):
-    shop = sess.query(Shop).filter_by(id=shop_id).one()
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
-    creator = get_user_info(shop.user_id)
-    if 'username' not in login_session \
-            or creator.id != login_session['user_id']:
-        return render_template('shop/shop_public.html',
-                               creator=creator,
-                               shop=shop,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
+    if sess.query(Shop).filter_by(id=shop_id).count():
+        shop = sess.query(Shop).filter_by(id=shop_id).one()
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+        creator = get_user_info(shop.user_id)
+        if 'username' not in login_session \
+                or creator.id != login_session['user_id']:
+            return render_template('shop/shop_public.html',
+                                   creator=creator,
+                                   shop=shop,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
+        else:
+            return render_template('shop/shop.html',
+                                   shop=shop,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
     else:
-        return render_template('shop/shop.html',
-                               shop=shop,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
+        return redirect(url_for('index'))
     pass
 
 
@@ -952,115 +974,116 @@ def new_shop():
 @app.route('/shop/<int:shop_id>/edit',
            methods=['GET', 'POST'])
 def edit_shop(shop_id):
-    edited_shop = sess.query(Shop) \
-        .filter_by(id=shop_id) \
-        .one()
     if 'username' not in login_session:
         return redirect('/login')
-    if edited_shop.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert" \
-               "('You are not authorized to edit this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+    if sess.query(Shop.id) \
+            .filter_by(id=shop_id) \
+            .count():
+        edited_shop = sess.query(Shop) \
+            .filter_by(id=shop_id) \
+            .one()
+        if edited_shop.user_id != login_session['user_id']:
+            return redirect(url_for('index'))
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-        if file and allowed_file(file.filename):
-            target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
-            # target = os.path.join(APP_ROOT, 'static/')
-            print(target)
-            if not os.path.isdir(target):
-                os.mkdir(target)
-            else:
-                print("Couldn't create upload directory: {}".format(target))
-            print(request.files.getlist("file"))
-            for upload in request.files.getlist("file"):
-                print(upload)
-                print("{} is the file name".format(upload.filename))
-                filename = upload.filename
-                destination = "/".join([target, filename])
-                print ("Accept incoming file:", filename)
-                print ("Save it to:", destination)
-                upload.save(destination)
-                print(destination)
-                edited_shop.up_file = upload.filename
-        if request.form['name']:
-            edited_shop.name = request.form['name']
-        if request.form['description']:
-            edited_shop.description = request.form['description']
-        sess.add(edited_shop)
-        sess.commit()
-        return redirect(url_for('u_shop',
-                                shop_id=edited_shop.id))
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+            if file and allowed_file(file.filename):
+                target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
+                # target = os.path.join(APP_ROOT, 'static/')
+                print(target)
+                if not os.path.isdir(target):
+                    os.mkdir(target)
+                else:
+                    print("Couldn't create upload directory: {}".format(target))
+                print(request.files.getlist("file"))
+                for upload in request.files.getlist("file"):
+                    print(upload)
+                    print("{} is the file name".format(upload.filename))
+                    filename = upload.filename
+                    destination = "/".join([target, filename])
+                    print ("Accept incoming file:", filename)
+                    print ("Save it to:", destination)
+                    upload.save(destination)
+                    print(destination)
+                    edited_shop.up_file = upload.filename
+            if request.form['name']:
+                edited_shop.name = request.form['name']
+            if request.form['description']:
+                edited_shop.description = request.form['description']
+            sess.add(edited_shop)
+            sess.commit()
+            return redirect(url_for('u_shop',
+                                    shop_id=edited_shop.id))
+        else:
+            return render_template('shop/shop_edit.html',
+                                   shop=edited_shop,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
+        pass
     else:
-        return render_template('shop/shop_edit.html',
-                               shop=edited_shop,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
-    pass
-
+        return redirect(url_for('index'))
 
 @auth.login_required
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/shop/<int:shop_id>/delete',
            methods=['GET', 'POST'])
 def delete_shop(shop_id):
-    shop = sess.query(Shop) \
-        .filter_by(id=shop_id) \
-        .one()
     if 'username' not in login_session:
         return redirect('/login')
-    if shop.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to delete this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+    if sess.query(Shop) \
+        .filter_by(id=shop_id) \
+            .count():
+        shop = sess.query(Shop) \
+            .filter_by(id=shop_id) \
+            .one()
+        if shop.user_id != login_session['user_id']:
+            return redirect('/index')
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    if request.method == 'POST':
-        sess.delete(shop)
-        sess.commit()
-        return redirect(url_for('all_shops',
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                ))
-    else:
-        return render_template('shop/deleteconfirmation_shop.html',
-                               shop=shop,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers)
-    pass
+        if request.method == 'POST':
+            sess.delete(shop)
+            sess.commit()
+            return redirect(url_for('all_shops',
+                                    menu_categories=menu_categories,
+                                    menu_shops=menu_shops,
+                                    menu_manufacturers=menu_manufacturers
+                                    ))
+        else:
+            return render_template('shop/deleteconfirmation_shop.html',
+                                   shop=shop,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers)
+        pass
+    return redirect(url_for('index'))
 
 
 """
@@ -1097,36 +1120,42 @@ def all_manufacturers():
 @app.route('/manufacturer/<int:manufacturer_id>/',
            methods=['GET', 'POST'])
 def u_manufacturer(manufacturer_id):
-    manufacturer = sess.query(Manufacturer) \
+
+    if sess.query(Manufacturer) \
         .filter_by(id=manufacturer_id) \
-        .one()
-    creator = get_user_info(manufacturer.user_id)
-    """"Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
-    if 'username' not in login_session \
-            or creator.id != login_session['user_id']:
-        return render_template('manufacturer/manufacturer_public.html',
-                               creator=creator,
-                               manufacturer=manufacturer,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
+            .count():
+        manufacturer = sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .one()
+        creator = get_user_info(manufacturer.user_id)
+        """"Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
+        if 'username' not in login_session \
+                or creator.id != login_session['user_id']:
+            return render_template('manufacturer/manufacturer_public.html',
+                                   creator=creator,
+                                   manufacturer=manufacturer,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
+        else:
+            return render_template('manufacturer/manufacturer.html',
+                                   manufacturer=manufacturer,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
     else:
-        return render_template('manufacturer/manufacturer.html',
-                               manufacturer=manufacturer,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
+        return redirect(url_for('index'))
     pass
 
 
@@ -1198,117 +1227,120 @@ def new_manufacturer():
 @app.route('/manufacturer/<int:manufacturer_id>/edit',
            methods=['GET', 'POST'])
 def edit_manufacturer(manufacturer_id):
-    edited_manufacturer = sess.query(Manufacturer) \
-        .filter_by(id=manufacturer_id) \
-        .one()
     if 'username' not in login_session:
         return redirect('/login')
-    if edited_manufacturer.user_id != login_session['user_id']:
-        return "<script>function myFunction()" \
-               "{alert('You are not authorized to edit this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+    if sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .count():
+        edited_manufacturer = sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .one()
+        if edited_manufacturer.user_id != login_session['user_id']:
+            return redirect('/index')
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-        if file and allowed_file(file.filename):
-            target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
-            # target = os.path.join(APP_ROOT, 'static/')
-            print(target)
-            if not os.path.isdir(target):
-                os.mkdir(target)
-            else:
-                print("Couldn't create upload directory: {}".format(target))
-            print(request.files.getlist("file"))
-            for upload in request.files.getlist("file"):
-                print(upload)
-                print("{} is the file name".format(upload.filename))
-                filename = upload.filename
-                destination = "/".join([target, filename])
-                print ("Accept incoming file:", filename)
-                print ("Save it to:", destination)
-                upload.save(destination)
-                print(destination)
-                edited_manufacturer.up_file = upload.filename
-        if request.form['name']:
-            edited_manufacturer.name = request.form['name']
-        if request.form['description']:
-            edited_manufacturer.description = request.form['description']
-        sess.add(edited_manufacturer)
-        sess.commit()
-        return redirect(url_for('u_manufacturer',
-                                manufacturer_id=edited_manufacturer.id))
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.files['file']
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            if file.filename == '':
+                flash('No selected file')
+            if file and allowed_file(file.filename):
+                target = os.path.abspath('var/www/flaskapps/catalog/static/uploads/images/')
+                # target = os.path.join(APP_ROOT, 'static/')
+                print(target)
+                if not os.path.isdir(target):
+                    os.mkdir(target)
+                else:
+                    print("Couldn't create upload directory: {}".format(target))
+                print(request.files.getlist("file"))
+                for upload in request.files.getlist("file"):
+                    print(upload)
+                    print("{} is the file name".format(upload.filename))
+                    filename = upload.filename
+                    destination = "/".join([target, filename])
+                    print ("Accept incoming file:", filename)
+                    print ("Save it to:", destination)
+                    upload.save(destination)
+                    print(destination)
+                    edited_manufacturer.up_file = upload.filename
+            if request.form['name']:
+                edited_manufacturer.name = request.form['name']
+            if request.form['description']:
+                edited_manufacturer.description = request.form['description']
+            sess.add(edited_manufacturer)
+            sess.commit()
+            return redirect(url_for('u_manufacturer',
+                                    manufacturer_id=edited_manufacturer.id))
+        else:
+            return render_template('manufacturer/manufacturer_edit.html',
+                                   manufacturer=edited_manufacturer,
+                                   menu_categories=menu_categories,
+                                   menu_shops=menu_shops,
+                                   menu_manufacturers=menu_manufacturers
+                                   )
+        pass
     else:
-        return render_template('manufacturer/manufacturer_edit.html',
-                               manufacturer=edited_manufacturer,
-                               menu_categories=menu_categories,
-                               menu_shops=menu_shops,
-                               menu_manufacturers=menu_manufacturers
-                               )
-    pass
-
+        return redirect(url_for('index'))
 
 @auth.login_required
 @rate_limit(limit=30, per=30 * 1)
 @app.route('/manufacturer/<int:manufacturer_id>/delete',
            methods=['GET', 'POST'])
 def delete_manufacturer(manufacturer_id):
-    manufacturer = sess.query(Manufacturer) \
-        .filter_by(id=manufacturer_id) \
-        .one()
     if 'username' not in login_session:
         return redirect('/login')
-    if manufacturer.user_id != login_session['user_id']:
-        return "<script>function myFunction() " \
-               "{alert('You are not authorized to delete this entry.')" \
-               ";}</script>" \
-               "<body onload='myFunction()''>"
+    if sess.query(Manufacturer) \
+        .filter_by(id=manufacturer_id) \
+            .count():
+        manufacturer = sess.query(Manufacturer) \
+            .filter_by(id=manufacturer_id) \
+            .one()
+        if manufacturer.user_id != login_session['user_id']:
+            return redirect('/login')
 
-    """Menu queries"""
-    menu_categories = sess.query(Category) \
-        .order_by(Category.id) \
-        .all()
-    menu_shops = sess.query(Shop) \
-        .order_by(Shop.id) \
-        .all()
-    menu_manufacturers = sess.query(Manufacturer) \
-        .order_by(Manufacturer.id) \
-        .all()
+        """Menu queries"""
+        menu_categories = sess.query(Category) \
+            .order_by(Category.id) \
+            .all()
+        menu_shops = sess.query(Shop) \
+            .order_by(Shop.id) \
+            .all()
+        menu_manufacturers = sess.query(Manufacturer) \
+            .order_by(Manufacturer.id) \
+            .all()
 
-    if request.method == 'POST':
-        sess.delete(manufacturer)
-        sess.commit()
-        return redirect(url_for('all_manufacturers',
-                                menu_categories=menu_categories,
-                                menu_shops=menu_shops,
-                                menu_manufacturers=menu_manufacturers
-                                ))
-    else:
-        return render_template(
+        if request.method == 'POST':
+            sess.delete(manufacturer)
+            sess.commit()
+            return redirect(url_for('all_manufacturers',
+                                    menu_categories=menu_categories,
+                                    menu_shops=menu_shops,
+                                    menu_manufacturers=menu_manufacturers
+                                    ))
+        else:
+            return render_template(
                 'manufacturer/deleteconfirmation_manufacturer.html',
                 manufacturer=manufacturer,
                 menu_categories=menu_categories,
                 menu_shops=menu_shops,
                 menu_manufacturers=menu_manufacturers
-        )
-    pass
+            )
+        pass
+    else:
+        return redirect(url_for('index'))
 
 """Login with a provider"""
 
@@ -1493,8 +1525,9 @@ def gconnect():
         user_id = create_user(login_session)
     login_session['user_id'] = user_id
 
-    output = ''
-    output += '<h1>Welcome, '
+    output = '<section class="form-section">'
+    output += '<div class="form-container">'
+    output += '<h1 class="form-header">Welcome, '
     output += login_session['username']
     output += '!</h1>'
     output += '<img src="'
@@ -1502,7 +1535,9 @@ def gconnect():
     output += '"style = "width: 300px;' \
               'height: 300px;border-radius: 150px' \
               '-webkit-border-radius: 150px;' \
-              '-moz-border-radius: 150px;"> '
+              '-moz-border-radius: 150px;"> ' \
+              '</section>' \
+              '</div>'
     flash("you are now logged in as %s"
           % login_session['username'])
     print("done!")
@@ -1594,7 +1629,7 @@ def disconnect():
             del login_session['picture']
             credentials = login_session.get('credentials')
             if credentials is None:
-                redirect('/login')
+                redirect('/index')
             access_token = credentials
             url = 'https://accounts.google.com/o/oauth2/' \
                   'revoke?token=%s' \
