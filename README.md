@@ -1,14 +1,14 @@
-# Is it Vegan - A FSND project
-### This app categorizes items in danish. The requirements for an item to get displayed is being 100% vegan.
-This is a flask web application, it uses OAuth2 providers to authenticate users and store them in a database.
+# Item Catalog - A FSND project
+
+#### This is a flask web application, it uses OAuth2 providers to authenticate users and store them in a database.
 
 The app has CRUD operations for:
 - Categories
 - Shops
 - Manufacturers
 - Items
-  - To add a new category/shop/manufacturer go to 'http://localhost:5050/tablename/new'
-    - For items, instead go to 'http://localhost:5050/category-id/item/new'
+  - To add a new category/shop/manufacturer go to 'http://localhost:5050/<tablename>/new'
+    - For items, instead go to 'http://localhost:5050/<category-id>/<item>/new'
   - To edit an entry - provided you are the creator - go to the entry and press the edit button
   - To delete an entry - provided you are the creator - go to the entry and press the delete button
 
@@ -66,9 +66,7 @@ An alternative is downloading [the Postman app](https://www.getpostman.com/) and
   ### Using
 - Pycharm - Coding
 - Postman - APIs
-- Webflow - Looks*
-
-  *I'm currently in the process of re-designing the front-end, ETA 01/08/17.
+- Webflow - Looks
 
 # Contribution
 All contributions a greatly appreciated.
